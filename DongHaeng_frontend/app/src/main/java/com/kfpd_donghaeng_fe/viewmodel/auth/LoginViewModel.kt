@@ -43,7 +43,7 @@ class LoginViewModel @Inject constructor(
     fun MovetoMain() {
         viewModelScope.launch {
             try {
-                val loginResult = checkCanLoginUseCase("helper@test.com", "test1234")
+                val loginResult = checkCanLoginUseCase("requester@test.com", "test1234")
 
                 if (loginResult.success) {
                     // 2️⃣ 성공 시 UserType 추출 (null이면 기본값 "NEEDY")

@@ -17,9 +17,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,6 +34,7 @@ import com.kfpd_donghaeng_fe.viewmodel.matching.PlaceSearchViewModel
 import com.kfpd_donghaeng_fe.R
 import com.kfpd_donghaeng_fe.domain.entity.LocationType
 import com.kfpd_donghaeng_fe.domain.entity.toRouteLocation
+import com.kfpd_donghaeng_fe.ui.matching.components.HomeCompanyTag
 
 /**
  * 재사용 가능한 장소 검색 화면
@@ -53,111 +56,109 @@ fun PlaceSearchScreen(
     val searchHistories by viewModel.searchHistories.collectAsState()
 
     val itemClickAction: (PlaceSearchResult) -> Unit = { place ->
+        viewModel.addToHistory(place)
         viewModel.setDetailPlace(place) // 1. 상세 정보(State) 업데이트 (지도 마커 표시용)
         onPlaceSelected(place)          // 2. 부모에게 "클릭됨" 알림 (핵심!)
     }
 
     // 💡 이미지와 동일하게 Full Screen Search UI 구성
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-
+        Spacer(modifier = Modifier.height(16.dp))
         // 1. 상단 검색바/네비게이션 영역
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp) // TopAppBar 높이
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 뒤로가기 버튼
-            IconButton(onClick = onBackPressed) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "뒤로가기",
-                    tint = AppColors.PrimaryDarkText
-                )
-            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(40.dp)
+                    .height(50.dp)
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        clip = false
+                    )
             ) {
                 BasicTextField(
                     value = searchQuery,
                     onValueChange = viewModel::updateSearchQuery,
                     modifier = Modifier
                         .fillMaxSize()
-                        // 1. 배경 및 테두리 설정 (OutlinedTextField 스타일 흉내)
                         .background(
-                            color = AppColors.LightGray.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            // 포커스/입력 유무에 따른 색상 처리 (필요시 isFocused 상태 추가 관리 가능)
-                            color = if (searchQuery.isNotEmpty()) AppColors.AccentColor else Color(0xFFE0E0E0),
-                            shape = RoundedCornerShape(20.dp)
+                            color = Color.White,
+                            shape = RoundedCornerShape(10.dp)
                         ),
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontSize = 16.sp,
                         color = AppColors.PrimaryDarkText
                     ),
                     singleLine = true,
-                    // 2. 내부 장식 (Placeholder, 아이콘, 텍스트 배치)
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 16.dp), // 좌우 여백
-                            verticalAlignment = Alignment.CenterVertically // 수직 중앙 정렬 (핵심!)
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // 뒤로가기 아이콘 (텍스트필드 안에)
+                            IconButton(
+                                onClick = onBackPressed,
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_chevron_left),
+                                    contentDescription = "뒤로가기",
+                                    tint = AppColors.PrimaryDarkText,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
                             Box(modifier = Modifier.weight(1f)) {
                                 // Placeholder
                                 if (searchQuery.isEmpty()) {
                                     Text(
                                         text = "장소, 버스, 지하철, 주소 검색",
                                         fontSize = 16.sp,
-                                        color = Color.Gray
+                                        color = Color.Gray,
+                                        style = MaterialTheme.typography.bodyMedium,
                                     )
                                 }
                                 // 실제 입력 필드
                                 innerTextField()
                             }
 
-                            // Trailing Icon (검색/삭제 아이콘)
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(
-                                    onClick = viewModel::clearSearchQuery,
-                                    modifier = Modifier.size(20.dp) // 아이콘 버튼 크기 조절
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "지우기",
-                                        tint = AppColors.SecondaryText
-                                    )
-                                }
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "검색",
-                                    tint = AppColors.SecondaryText,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            // 검색 아이콘 (텍스트필드 안에)
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "검색",
+                                tint = AppColors.SecondaryText,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 )
             }
 
-            // 우측 화살표 버튼 (이미지처럼, 지금은 닫기 기능으로 대체)
-            IconButton(onClick = onBackPressed) {
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // 우측 주황색 아이콘 (ic_send)
+            IconButton(onClick = { /* 검색 실행 또는 다른 액션 */ }) {
                 Icon(
-                    painterResource(id = R.drawable.ic_send), // 임시로 ic_send 사용
-                    contentDescription = "닫기",
-                    tint = AppColors.AccentColor
+                    painter = painterResource(id = R.drawable.ic_go),
+                    contentDescription = "전송",
+                    tint = AppColors.AccentColor, // 주황색,
+                    modifier = Modifier.size(40.dp)
                 )
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
         // 2. 홈/회사 태그 및 최근 검색
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // 홈/회사 버튼 (PathInputBox에서 재사용)
@@ -173,14 +174,14 @@ fun PlaceSearchScreen(
                 // 히스토리 표시
                 if (searchHistories.isNotEmpty()) {
                     Text(
-                        text = "최근 검색",
+                        text = "최근 검색어",
                         fontSize = 14.sp,
                         color = AppColors.SecondaryText,
                         modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
                     )
                     LazyColumn {
                         items(searchHistories) { place ->
-                            PlaceItem(place = place, onClick = { itemClickAction(place) })
+                            HistoryItem(place = place, onClick = { itemClickAction(place) })
                         }
                     }
                 }
@@ -189,7 +190,15 @@ fun PlaceSearchScreen(
                 if (isLoading) {
                     // ... 로딩 인디케이터
                 } else if (searchResults.isEmpty()) {
-                    // ... 결과 없음
+                    Text(
+                        text = "검색 결과가 없습니다",
+                        fontSize = 14.sp,
+                        color = AppColors.SecondaryText,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        textAlign = TextAlign.Center
+                    )
                 } else {
                     // 검색 결과 리스트
                     LazyColumn {
@@ -242,25 +251,43 @@ fun PlaceItem(
 }
 
 @Composable
-private fun HomeCompanyTag(label: String, iconResId: Int) {
-    Row(
-        modifier = Modifier
-            .background(AppColors.LightGray, RoundedCornerShape(8.dp))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+fun HistoryItem(
+    place: PlaceSearchResult,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            painter = painterResource(id = iconResId),
-            contentDescription = label,
-            tint = AppColors.SecondaryText,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(Modifier.width(4.dp))
-        Text(
-            text = label,
-            color = AppColors.PrimaryDarkText,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 핀 아이콘
+            Icon(
+                painter = painterResource(id = R.drawable.ic_pin),
+                contentDescription = "위치 핀",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // 장소명
+            Text(
+                text = place.placeName,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = AppColors.PrimaryDarkText
+            )
+        }
+
+        // 구분선
+        Divider(
+            color = Color(0xFFE0E0E0),
+            thickness = 1.dp
         )
     }
 }
