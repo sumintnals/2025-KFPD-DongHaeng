@@ -76,10 +76,14 @@ class OngoingQRRepositoryImpl @Inject constructor(
     ): Result<QRScanResultEntity> {
 
         // 1. Entity -> DTO 변환 (API 요청용)
+//        val requestDto = QRScanRequest(
+//            qrCode = requestEntity.qrCode,
+//            latitude = requestEntity.latitude,
+//            longitude = requestEntity.longitude
+//        )
+
         val requestDto = QRScanRequest(
-            qrCode = requestEntity.qrCode,
-            latitude = requestEntity.latitude,
-            longitude = requestEntity.longitude
+            qrData = requestEntity.qrCode
         )
 
         // 2. 요청 실행 및 결과 처리

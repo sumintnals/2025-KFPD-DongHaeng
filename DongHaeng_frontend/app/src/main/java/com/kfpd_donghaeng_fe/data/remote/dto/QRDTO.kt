@@ -12,6 +12,7 @@ import com.google.gson.annotations.SerializedName
 
 data class QRDto(
     //@SerializedName("matchId") val matchId :Long,
+    @SerializedName("qr_code") val qrCode: String?,
     @SerializedName("qr_image_url") val qrCodeImg: String,
     //@SerializedName("qrData") val qrData:String,
     @SerializedName ("auth_type") val qrType : String,//start or end
@@ -53,8 +54,11 @@ data class QRScanResponseDto(
 
 
 // 동행 시작(QR스캔)
+//data class QRScanRequest(
+//    @SerializedName("qrCode") val qrCode: String,      // 스캔한 QR 코드 문자열
+//    @SerializedName("latitude") val latitude: Double,   // 스캔한 위치 위도
+//    @SerializedName("longitude") val longitude: Double  // 스캔한 위치 경도
+//)
 data class QRScanRequest(
-    @SerializedName("qrCode") val qrCode: String,      // 스캔한 QR 코드 문자열
-    @SerializedName("latitude") val latitude: Double,   // 스캔한 위치 위도
-    @SerializedName("longitude") val longitude: Double  // 스캔한 위치 경도
+    @SerializedName("qrData") val qrData: String,      // 변경됨
 )
