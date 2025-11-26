@@ -34,15 +34,15 @@ data class AfterQRScanDto(
 //POST /api/qr/scan
 
 data class QRScanResponseDto(
-    @SerializedName("match_id") val matchId: Int,
-    @SerializedName("auth_type") val authType: String, // start or end
-    @SerializedName("scanned_at") val scannedAt: String,
+    @SerializedName("matchId") val matchId: Int,
+    @SerializedName("authType") val authType: String, // start or end
+    @SerializedName("scannedAt") val scannedAt: String,
     @SerializedName("status") val status: String, // ongoing or completed
 
     // --- '종료' 응답에만 있는 Nullable 필드 ---
-    @SerializedName("actual_duration_minutes") val actualDurationMinutes: Int?,
-    @SerializedName("earned_points") val earnedPoints: Int?,
-    @SerializedName("earned_volunteer_minutes") val earnedVolunteerMinutes: Int?
+    @SerializedName("actualDurationMinutes") val actualDurationMinutes: Int?,
+    @SerializedName("earnedPoints") val earnedPoints: Int?,
+    @SerializedName("earnedVolunteerMinutes") val earnedVolunteerMinutes: Int?
 )
 
 
@@ -54,7 +54,7 @@ data class QRScanResponseDto(
 
 // 동행 시작(QR스캔)
 data class QRScanRequest(
-    @SerializedName("qr_code") val qrCode: String,      // 스캔한 QR 코드 문자열
+    @SerializedName("qrCode") val qrCode: String,      // 스캔한 QR 코드 문자열
     @SerializedName("latitude") val latitude: Double,   // 스캔한 위치 위도
     @SerializedName("longitude") val longitude: Double  // 스캔한 위치 경도
 )

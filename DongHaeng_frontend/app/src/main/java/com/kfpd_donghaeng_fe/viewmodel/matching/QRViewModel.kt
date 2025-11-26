@@ -156,8 +156,11 @@ class QRViewModel @Inject constructor(
                     current.copy(qrEntity = current.qrEntity.copy(qrScanned = true))
 
                 }
+                Log.d("QR_DEBUG", "서버 스캔 성공, 이벤트 발행 직전!")
+                _eventFlow.emit(OngoingUiEvent.ShowSnackbar("QR 코드가 스캔되었습니다. 다음 단계로 이동합니다."))
                 _eventFlow.emit(OngoingUiEvent.NavigateAfterQrScan)
             }.onFailure { e ->
+                Log.e("QR_DEBUG", "서버 스캔 실패", e)
                 _uiState.update { it.copy(isError = true) }
             }
         }

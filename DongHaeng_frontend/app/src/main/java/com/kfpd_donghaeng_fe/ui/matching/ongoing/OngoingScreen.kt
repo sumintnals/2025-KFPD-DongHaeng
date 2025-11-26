@@ -203,6 +203,7 @@ fun OngoingRoute(
     val uiState by viewModel.uiState.collectAsState()
     val uiState2 by viewModel.uiState2.collectAsState()
 
+    // 💡 수정: Non-null QRScreenUiState 구독
     val qrScreenUiState by viewModel2.uiState.collectAsState()
 
     val qrEntity = qrScreenUiState.qrEntity
@@ -210,14 +211,22 @@ fun OngoingRoute(
     val locateUiState by viewModel2.locateUiState.collectAsState()
     val resultUiState by viewModel2.resultUiState.collectAsState()
 
+    // 💡 Non-null 상태에서 qrScanned 플래그 추출
+    val isScanned = qrScreenUiState.qrEntity.qrScanned
     val ongoingPage = uiState.OngoingPage
+    var currentQrType by remember { mutableStateOf(QRTypes.NONE) }
+    var currentMatchId by remember { mutableStateOf(0L) }
+    val context = LocalContext.current
 
     // 1. QRViewModel 이벤트 구독
     LaunchedEffect(key1 = Unit) {
         viewModel2.eventFlow.collect { event ->
             when (event) {
+                // QRViewModel에서 발행한 페이지 이동 요청 이벤트 처리
                 is OngoingUiEvent.NavigateAfterQrScan -> {
+                    // 🎯 [핵심] nextPage() 실행
                     viewModel.nextPage()
+                    Log.d("QR_NAV", "QR Scan 성공 이벤트 수신 -> OngoingViewModel.nextPage() 실행")
                 }
                 else -> { }
             }
@@ -241,14 +250,18 @@ fun OngoingRoute(
             }
         }
     }
-
     LaunchedEffect(matchId, ongoingPage) {
-        if (ongoingPage == 0) {
+        if (ongoingPage == 0) { // Start QR 페이지
             viewModel2.loadStartQRInfo(matchId, QRTypes.START)
-        } else if (ongoingPage == 2) {
+        } else if (ongoingPage == 2) { // End QR 페이지
             viewModel2.loadEndQRInfo(matchId, QRTypes.END)
         }
     }
+
+
+
+
+
 
     /*
     지도

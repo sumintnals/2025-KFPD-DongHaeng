@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
 // 2. OngoingViewModel 클래스를 단일 정의
 // -----------------------------------------------------------
 
+
 @HiltViewModel
 class OngoingViewModel @Inject constructor(
     private val socketManager: SocketManager,
@@ -270,9 +271,12 @@ class OngoingViewModel @Inject constructor(
         val myMarkerType = if (myUserType == UserType.NEEDY) LocationType.REQUESTER else LocationType.COMPANION
         updateMarker(myMarkerType, lat, lng)
 
+        // 서버로 전송 (MatchId가 있을 때만)
         if (currentMatchId != -1L) {
             socketManager.sendLocation(currentMatchId, lat, lng)
         }
+
+        // 도착 판별
         checkArrival(lat, lng)
     }
 
@@ -298,7 +302,8 @@ class OngoingViewModel @Inject constructor(
 }
 
 sealed class OngoingUiEvent {
-    object NavigateAfterQrScan : OngoingUiEvent()
+    object NavigateAfterQrScan: OngoingUiEvent()
+    data class ShowSnackbar(val message: String) : OngoingUiEvent()
     data class NavigateToReview(
         val matchId: Long,
         val partnerId: Long,
